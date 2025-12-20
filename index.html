@@ -1,2 +1,865 @@
-# vitrinelocal.github.io
-site principal de busca de estabelecimentos na região
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitrine Local - Encontre Estabelecimentos Próximos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a1a1a;
+            --secondary: #2d2d2d;
+            --gray: #5f6368;
+            --gray-light: #e8eaed;
+            --gray-lighter: #f8f9fa;
+            --white: #ffffff;
+            --border: #dadce0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #fafafa;
+            color: var(--primary);
+        }
+
+        header {
+            background: var(--primary);
+            border-bottom: 1px solid var(--secondary);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--white);
+            white-space: nowrap;
+        }
+
+        .logo i {
+            color: var(--gray-light);
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 700px;
+        }
+
+        .search-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.2rem;
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            background: var(--white);
+            transition: box-shadow 0.2s;
+        }
+
+        .search-input-wrapper:focus-within {
+            box-shadow: 0 1px 6px rgba(0,0,0,0.15);
+            border-color: transparent;
+        }
+
+        .search-input-wrapper i {
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        .radius-select {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--gray);
+            background: var(--white);
+            cursor: pointer;
+            outline: none;
+        }
+
+        .location-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            background: var(--secondary);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--white);
+        }
+
+        .location-badge i {
+            font-size: 0.9rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+            background: #f5f5f5;
+        }
+
+        .categories {
+            display: flex;
+            gap: 0.8rem;
+            padding: 1rem 0;
+            overflow-x: auto;
+            scrollbar-width: none;
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .categories::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-chip {
+            padding: 0.5rem 1.2rem;
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            background: var(--white);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .category-chip:hover {
+            background: var(--gray-lighter);
+            border-color: var(--secondary);
+        }
+
+        .category-chip.active {
+            background: var(--secondary);
+            color: var(--white);
+            border-color: var(--secondary);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 500px 1fr;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .results-section {
+            height: calc(100vh - 250px);
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .results-section::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .results-section::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .results-section::-webkit-scrollbar-thumb {
+            background: var(--gray-light);
+            border-radius: 10px;
+        }
+
+        .results-header {
+            padding: 0.5rem 0 1rem 0;
+            color: var(--gray);
+            font-size: 0.9rem;
+            background: var(--white);
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .place-card {
+            background: var(--white);
+            border: 1px solid var(--gray-light);
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .place-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .place-card.selected {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            background: #fafafa;
+        }
+
+        .place-header {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .place-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 2rem;
+            flex-shrink: 0;
+            object-fit: cover;
+        }
+
+        .place-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .place-name {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--primary);
+            margin-bottom: 0.2rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .place-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+
+        .stars {
+            color: var(--primary);
+        }
+
+        .rating-text {
+            color: var(--gray);
+        }
+
+        .place-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .place-status {
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-open {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .status-closed {
+            background: var(--gray);
+            color: var(--white);
+        }
+
+        .place-address {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-top: 0.8rem;
+            display: flex;
+            align-items: start;
+            gap: 0.4rem;
+        }
+
+        .place-address i {
+            margin-top: 0.2rem;
+            flex-shrink: 0;
+        }
+
+        .map-section {
+            position: sticky;
+            top: 100px;
+            height: calc(100vh - 250px);
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--gray-light);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--gray);
+        }
+
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--gray-light);
+        }
+
+        .load-more {
+            padding: 1rem;
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .api-notice {
+            background: var(--white);
+            border: 1px solid var(--gray-light);
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .api-notice h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .api-notice p {
+            color: var(--gray);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .api-notice code {
+            background: var(--white);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+            color: var(--primary);
+            border: 1px solid var(--border);
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .map-section {
+                position: relative;
+                top: 0;
+                height: 400px;
+                order: -1;
+            }
+
+            .results-section {
+                height: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .search-bar {
+                order: 3;
+                flex-basis: 100%;
+                max-width: 100%;
+            }
+
+            .categories {
+                padding: 0.5rem 0;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .place-card {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-store"></i>
+                Vitrine Local
+            </div>
+            
+            <div class="search-bar">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        class="search-input" 
+                        placeholder="Buscar estabelecimentos..."
+                        onkeypress="handleSearchKeyPress(event)">
+                    <select id="radiusSelect" class="radius-select">
+                        <option value="1000">1 km</option>
+                        <option value="2000">2 km</option>
+                        <option value="5000" selected>5 km</option>
+                        <option value="10000">10 km</option>
+                        <option value="20000">20 km</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="location-badge" id="locationBadge">
+                <i class="fas fa-circle-notch fa-spin"></i>
+                <span>Localizando...</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="api-notice" id="apiNotice">
+            <h3><i class="fas fa-info-circle"></i> Configuração Necessária</h3>
+            <p>
+                Adicione sua chave da API do Google Maps no código. Acesse 
+                <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a> e 
+                ative as APIs: <strong>Maps JavaScript API</strong> e <strong>Places API</strong>. 
+                Substitua <code>YOUR_API_KEY_HERE</code> pela sua chave.
+            </p>
+        </div>
+
+        <div class="categories" id="categories"></div>
+
+        <div class="main-content">
+            <div class="results-section" id="resultsSection">
+                <div class="results-header" id="resultsHeader">
+                    Busque por estabelecimentos próximos
+                </div>
+                <div id="resultsList">
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <h3>Comece a buscar</h3>
+                        <p>Digite algo ou selecione uma categoria</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="map-section">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = 'YOUR_API_KEY_HERE';
+
+        const categories = [
+            { name: 'Restaurantes', icon: 'utensils', type: 'restaurant' },
+            { name: 'Cafés', icon: 'coffee', type: 'cafe' },
+            { name: 'Hotéis', icon: 'hotel', type: 'lodging' },
+            { name: 'Farmácias', icon: 'pills', type: 'pharmacy' },
+            { name: 'Supermercados', icon: 'shopping-cart', type: 'supermarket' },
+            { name: 'Hospitais', icon: 'hospital', type: 'hospital' },
+            { name: 'Bancos', icon: 'university', type: 'bank' },
+            { name: 'Postos', icon: 'gas-pump', type: 'gas_station' },
+            { name: 'Academias', icon: 'dumbbell', type: 'gym' },
+            { name: 'Beleza', icon: 'cut', type: 'beauty_salon' },
+            { name: 'Lojas', icon: 'store', type: 'store' },
+            { name: 'Bares', icon: 'beer', type: 'bar' }
+        ];
+
+        let map, service, userLocation, markers = [], places = [], selectedCategory = null;
+        let displayedPlaces = 0;
+        const PLACES_PER_PAGE = 10;
+        let isLoading = false;
+
+        function initMap() {
+            userLocation = { lat: -22.9068, lng: -43.1729 };
+            
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: userLocation,
+                zoom: 14,
+                disableDefaultUI: false,
+                zoomControl: true,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: true,
+                styles: [
+                    {
+                        featureType: 'poi',
+                        elementType: 'labels',
+                        stylers: [{ visibility: 'off' }]
+                    }
+                ]
+            });
+
+            service = new google.maps.places.PlacesService(map);
+            
+            renderCategories();
+            getUserLocation();
+            setupInfiniteScroll();
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('categories');
+            container.innerHTML = categories.map(cat => `
+                <div class="category-chip" onclick="selectCategory('${cat.type}', this)">
+                    <i class="fas fa-${cat.icon}"></i>
+                    ${cat.name}
+                </div>
+            `).join('');
+        }
+
+        function selectCategory(type, element) {
+            document.querySelectorAll('.category-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            element.classList.add('active');
+            selectedCategory = type;
+            document.getElementById('searchInput').value = '';
+            searchPlaces();
+        }
+
+        function getUserLocation() {
+            const badge = document.getElementById('locationBadge');
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        
+                        map.setCenter(userLocation);
+                        
+                        new google.maps.Marker({
+                            position: userLocation,
+                            map: map,
+                            icon: {
+                                path: google.maps.SymbolPath.CIRCLE,
+                                scale: 8,
+                                fillColor: '#1a1a1a',
+                                fillOpacity: 1,
+                                strokeColor: 'white',
+                                strokeWeight: 2
+                            }
+                        });
+
+                        badge.innerHTML = '<i class="fas fa-map-marker-alt"></i><span>Localizado</span>';
+                    },
+                    (error) => {
+                        badge.innerHTML = '<i class="fas fa-map-marker-alt"></i><span>Local padrão</span>';
+                    }
+                );
+            }
+        }
+
+        function handleSearchKeyPress(event) {
+            if (event.key === 'Enter') {
+                selectedCategory = null;
+                document.querySelectorAll('.category-chip').forEach(chip => {
+                    chip.classList.remove('active');
+                });
+                searchPlaces();
+            }
+        }
+
+        function searchPlaces() {
+            const searchQuery = document.getElementById('searchInput').value;
+            const radius = parseInt(document.getElementById('radiusSelect').value);
+            
+            const query = searchQuery || selectedCategory || 'estabelecimento';
+
+            clearMarkers();
+            displayedPlaces = 0;
+            showLoading();
+
+            const request = {
+                location: userLocation,
+                radius: radius,
+                keyword: query
+            };
+
+            if (selectedCategory && !searchQuery) {
+                request.type = [selectedCategory];
+                delete request.keyword;
+            }
+
+            service.nearbySearch(request, (results, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                    places = results;
+                    displayResults();
+                    addMarkers(results);
+                } else {
+                    showEmptyState('Nenhum estabelecimento encontrado');
+                }
+            });
+        }
+
+        function showLoading() {
+            document.getElementById('resultsList').innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                    <p>Buscando...</p>
+                </div>
+            `;
+        }
+
+        function showEmptyState(message) {
+            document.getElementById('resultsList').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-search"></i>
+                    <h3>${message}</h3>
+                    <p>Tente outra busca ou categoria</p>
+                </div>
+            `;
+            document.getElementById('resultsHeader').textContent = 'Nenhum resultado';
+        }
+
+        function displayResults() {
+            const listEl = document.getElementById('resultsList');
+            const start = displayedPlaces;
+            const end = Math.min(displayedPlaces + PLACES_PER_PAGE, places.length);
+            
+            if (start === 0) {
+                listEl.innerHTML = '';
+                document.getElementById('resultsHeader').textContent = 
+                    `${places.length} estabelecimentos encontrados`;
+            }
+
+            const newPlaces = places.slice(start, end);
+            
+            newPlaces.forEach((place, index) => {
+                const globalIndex = start + index;
+                const card = createPlaceCard(place, globalIndex);
+                listEl.insertAdjacentHTML('beforeend', card);
+            });
+
+            displayedPlaces = end;
+
+            if (displayedPlaces < places.length) {
+                listEl.insertAdjacentHTML('beforeend', `
+                    <div class="load-more" id="loadMoreIndicator">
+                        Carregando mais resultados...
+                    </div>
+                `);
+            }
+        }
+
+        function createPlaceCard(place, index) {
+            const distance = calculateDistance(userLocation, place.geometry.location);
+            const rating = place.rating || 0;
+            const photoUrl = place.photos && place.photos[0] 
+                ? place.photos[0].getUrl({ maxWidth: 200 }) 
+                : null;
+
+            return `
+                <div class="place-card" onclick="selectPlace(${index})">
+                    <div class="place-header">
+                        ${photoUrl 
+                            ? `<img src="${photoUrl}" class="place-image" alt="${place.name}">` 
+                            : `<div class="place-image"><i class="fas fa-store"></i></div>`
+                        }
+                        <div class="place-info">
+                            <div class="place-name">${place.name}</div>
+                            <div class="place-rating">
+                                <span class="stars">${getStars(rating)}</span>
+                                <span class="rating-text">${rating.toFixed(1)} · ${place.user_ratings_total || 0} avaliações</span>
+                            </div>
+                            <div class="place-meta">
+                                <span class="meta-item">
+                                    <i class="fas fa-route"></i>
+                                    ${distance} km
+                                </span>
+                                ${place.opening_hours 
+                                    ? `<span class="place-status ${place.opening_hours.open_now ? 'status-open' : 'status-closed'}">
+                                        ${place.opening_hours.open_now ? 'Aberto' : 'Fechado'}
+                                       </span>`
+                                    : ''
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="place-address">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>${place.vicinity}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setupInfiniteScroll() {
+            const resultsSection = document.getElementById('resultsSection');
+            
+            resultsSection.addEventListener('scroll', () => {
+                const scrollTop = resultsSection.scrollTop;
+                const scrollHeight = resultsSection.scrollHeight;
+                const clientHeight = resultsSection.clientHeight;
+                
+                if (scrollTop + clientHeight >= scrollHeight - 100 && !isLoading && displayedPlaces < places.length) {
+                    isLoading = true;
+                    setTimeout(() => {
+                        const loadMoreEl = document.getElementById('loadMoreIndicator');
+                        if (loadMoreEl) {
+                            loadMoreEl.remove();
+                        }
+                        displayResults();
+                        isLoading = false;
+                    }, 300);
+                }
+            });
+        }
+
+        function selectPlace(index) {
+            const place = places[index];
+            
+            document.querySelectorAll('.place-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelectorAll('.place-card')[index].classList.add('selected');
+
+            map.setCenter(place.geometry.location);
+            map.setZoom(16);
+
+            if (markers[index]) {
+                markers[index].setAnimation(google.maps.Animation.BOUNCE);
+                setTimeout(() => {
+                    markers[index].setAnimation(null);
+                }, 1400);
+            }
+        }
+
+        function addMarkers(results) {
+            results.forEach((place, index) => {
+                const marker = new google.maps.Marker({
+                    position: place.geometry.location,
+                    map: map,
+                    title: place.name,
+                    animation: google.maps.Animation.DROP
+                });
+
+                marker.addListener('click', () => {
+                    selectPlace(index);
+                    const cards = document.querySelectorAll('.place-card');
+                    if (cards[index]) {
+                        cards[index].scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
+                    }
+                });
+
+                markers.push(marker);
+            });
+        }
+
+        function clearMarkers() {
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
+        }
+
+        function calculateDistance(from, to) {
+            const lat1 = from.lat;
+            const lng1 = from.lng;
+            const lat2 = typeof to.lat === 'function' ? to.lat() : to.lat;
+            const lng2 = typeof to.lng === 'function' ? to.lng() : to.lng;
+
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return (R * c).toFixed(1);
+        }
+
+        function getStars(rating) {
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5 ? 1 : 0;
+            const emptyStars = 5 - fullStars - halfStar;
+            
+            return '★'.repeat(fullStars) + 
+                   (halfStar ? '⯨' : '') + 
+                   '☆'.repeat(emptyStars);
+        }
+
+        document.getElementById('radiusSelect').addEventListener('change', () => {
+            if (places.length > 0 || selectedCategory) {
+                searchPlaces();
+            }
+        });
+    </script>
+
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY_HERE&libraries=places&callback=initMap">
+    </script>
+</body>
+</html>
